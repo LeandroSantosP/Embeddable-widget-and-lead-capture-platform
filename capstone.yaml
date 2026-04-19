@@ -1,0 +1,7 @@
+name: flyrank-capstone
+version: 1
+run: docker compose up -d && npm run dev
+test: npm test
+seed: docker compose up -d
+base_url: http://localhost:3000
+client_test_url: http://localhost:8080
