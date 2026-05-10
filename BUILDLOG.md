@@ -1,10 +1,10 @@
 # BUILDLOG
 
-## Project approach
+## Project Approach
 
 This project was built incrementally from SPEC-01 through SPEC-07. The implementation favors small Express routers, parameterized PostgreSQL queries, Zod boundary validation, and services that can be replaced in tests.
 
-## Where AI helped
+## Where AI Helped
 
 - Scaffolding the Node.js and Docker Compose setup.
 - Designing the PostgreSQL schema and tenant-scoped repository queries.
@@ -12,7 +12,7 @@ This project was built incrementally from SPEC-01 through SPEC-07. The implement
 - Generating focused Supertest/Jest acceptance probes and the Postman collection.
 - Reviewing the final documentation and evidence pack.
 
-## Where AI was wrong or incomplete
+## Where AI Was Wrong or Incomplete
 
 - The initial project setup accidentally left two JSON objects concatenated in `package.json` after an interrupted `npm init`; this was detected by `npm install` and repaired.
 - PostgreSQL startup initially failed because an unrelated `meetzen-postgres` container already owned port `5432`; the conflict was diagnosed and the project container was started after that container was stopped.

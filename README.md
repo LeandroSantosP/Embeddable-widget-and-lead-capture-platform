@@ -1,8 +1,8 @@
 # FlyRank Capstone: Embeddable Widget & Lead-Capture Platform
 
-Plataforma SaaS multi-tenant para criação de widgets de captura de leads e incorporação em sites externos usando apenas uma tag `<script>`. O backend usa Node.js, Express e PostgreSQL, com foco em CORS, validação de fronteira, isolamento por tenant, proteção contra abuso e resiliência em integrações externas.
+Multi-tenant SaaS platform for creating lead-capture widgets and embedding them on external websites with a single `<script>` tag. The backend uses Node.js, Express and PostgreSQL, with a focus on CORS, boundary validation, tenant isolation, abuse protection and resilient external integrations.
 
-## Arquitetura do Sistema
+## System Architecture
 
 ```text
 [ Widget Owner ]
@@ -32,11 +32,11 @@ Plataforma SaaS multi-tenant para criação de widgets de captura de leads e inc
     [ Lead saved in PostgreSQL ]
 ```
 
-## Como Executar
+## Getting Started
 
-### Pre-requisitos
+### Prerequisites
 
-- Node.js 22 ou superior
+- Node.js 22 or later
 - npm
 - Docker e Docker Compose
 
@@ -49,102 +49,102 @@ docker compose up -d
 npm run dev
 ```
 
-A API estará disponível em `http://localhost:3000`.
+The API will be available at `http://localhost:3000`.
 
-Para executar os testes automatizados:
+Run the automated tests with:
 
 ```sh
 npm test
 ```
 
-Para abrir o site cliente em outra origem:
+To open the client site from a different origin:
 
 ```sh
 npx serve test-site -l 8080
 ```
 
-O ID do widget usado no site está em `test-site/index.html`. Para criar um novo widget, use o Postman e substitua o ID pelo valor retornado.
+The widget ID used by the client site is in `test-site/index.html`. To create a new widget, use Postman and replace the ID with the returned value.
 
 ## Swagger / OpenAPI
 
-A documentação interativa está disponível em:
+Interactive documentation is available at:
 
 `http://localhost:3000/api-docs/`
 
-O documento descreve autenticação, widgets, delivery público, submissões e dashboard. A especificação está centralizada em `src/config/swagger.js`.
+The document describes authentication, widgets, public delivery, submissions and the dashboard. The specification is defined in `src/config/swagger.js`.
 
-## Endpoints da API
+## API Endpoints
 
-### Health e documentação
+### Health and documentation
 
-- `GET /health` - verifica se a API está disponível.
-- `GET /api-docs/` - abre a interface Swagger UI.
+- `GET /health` - checks whether the API is available.
+- `GET /api-docs/` - opens the Swagger UI.
 
-### Autenticação
+### Authentication
 
-- `POST /api/auth/register` - registra um tenant e armazena a senha com hash.
-- `POST /api/auth/login` - retorna um JWT com validade de 24 horas.
+- `POST /api/auth/register` - registers a tenant and stores a password hash.
+- `POST /api/auth/login` - returns a JWT valid for 24 hours.
 
-### Gestão de widgets autenticada
+### Authenticated widget management
 
-Envie `Authorization: Bearer <token>` nas rotas abaixo:
+Send `Authorization: Bearer <token>` with the following routes:
 
-- `POST /api/widgets` - cria um widget.
-- `GET /api/widgets` - lista os widgets do tenant autenticado.
-- `GET /api/widgets/:id` - consulta um widget do tenant autenticado.
-- `PUT /api/widgets/:id` - atualiza um widget do tenant autenticado.
-- `DELETE /api/widgets/:id` - remove um widget do tenant autenticado.
+- `POST /api/widgets` - creates a widget.
+- `GET /api/widgets` - lists the authenticated tenant's widgets.
+- `GET /api/widgets/:id` - gets an owned widget.
+- `PUT /api/widgets/:id` - updates an owned widget.
+- `DELETE /api/widgets/:id` - deletes an owned widget.
 
-As respostas de widget incluem `embed_snippet`.
+Widget responses include `embed_snippet`.
 
-### Delivery público
+### Public delivery
 
-- `GET /widget.js` - entrega o script incorporável com cache público.
-- `GET /api/widgets/:id/config` - entrega somente a configuração pública do widget.
+- `GET /widget.js` - serves the embeddable script with public caching.
+- `GET /api/widgets/:id/config` - serves only the widget's public configuration.
 
-### Submissão pública
+### Public submission
 
-- `OPTIONS /api/submissions` - responde ao preflight CORS.
-- `POST /api/submissions` - recebe um lead, valida o payload, bloqueia honeypot, aplica rate limit, tenta geolocalização e salva a submissão.
+- `OPTIONS /api/submissions` - handles the CORS preflight.
+- `POST /api/submissions` - receives a lead, validates the payload, blocks the honeypot, applies rate limiting, attempts geolocation and saves the submission.
 
-### Dashboard autenticada
+### Authenticated dashboard
 
 Envie `Authorization: Bearer <token>`:
 
-- `GET /api/widgets/:id/submissions` - lista os leads do widget, do mais recente para o mais antigo.
-- `GET /api/widgets/:id/stats` - retorna a contagem total e agregações por país/cidade.
+- `GET /api/widgets/:id/submissions` - lists the widget's leads, newest first.
+- `GET /api/widgets/:id/stats` - returns the total count and country/city aggregates.
 
-## Segurança e Resiliência
+## Security and Resilience
 
-- Isolamento multi-tenant aplicado nas queries de widgets e submissions.
-- CORS configurado para permitir a incorporação pública do widget.
-- Payloads JSON limitados a 16 KB; corpos inválidos retornam erros `4xx`.
-- Rate limit padrão de cinco submissões por minuto por IP/widget.
-- Honeypot `address_line_2` bloqueia bots sem persistir o lead.
-- Geolocalização tenta `ip-api.com` e depois `ipapi.co`.
-- Falhas de ambos os provedores salvam o lead com `geo_data` nulo.
-- Falhas da notificação mockada não alteram o sucesso da submissão.
-- Campos com aparência de senha são rejeitados no endpoint público.
+- Multi-tenant isolation is enforced in widget and submission queries.
+- CORS is configured to allow public widget embedding.
+- JSON payloads are limited to 16 KB; invalid bodies return `4xx` errors.
+- The default rate limit is five submissions per minute per IP/widget.
+- The `address_line_2` honeypot blocks bots without persisting the lead.
+- Geolocation tries `ip-api.com` and then `ipapi.co`.
+- If both providers fail, the lead is saved with null `geo_data`.
+- Mock notification failures do not change the submission success response.
+- Password-like fields are rejected by the public endpoint.
 
 ## Postman
 
-Importe [postman/FlyRank-Capstone.postman_collection.json](postman/FlyRank-Capstone.postman_collection.json). Execute `Register tenant`, `Login tenant` e `Create signup widget`; as variáveis `token` e `widgetId` serão preenchidas automaticamente. A collection também inclui delivery, submissions, dashboard, validações, honeypot, oversized e Swagger.
+Import [postman/FlyRank-Capstone.postman_collection.json](postman/FlyRank-Capstone.postman_collection.json). Run `Register tenant`, `Login tenant` and `Create signup widget`; the `token` and `widgetId` variables are filled automatically. The collection also includes delivery, submissions, dashboard, validation, honeypot, oversized-payload and Swagger requests.
 
-## Banco de Dados e Configuração
+## Database and Configuration
 
-O PostgreSQL é executado pelo Docker Compose na porta `5432`. Em um volume novo, o arquivo `src/database/init.sql` cria `tenants`, `widgets`, `submissions`, as chaves estrangeiras e os índices.
+PostgreSQL runs through Docker Compose on port `5432`. On a fresh volume, `src/database/init.sql` creates `tenants`, `widgets`, `submissions`, foreign keys and indexes.
 
-Copie `.env.example` para `.env`. O arquivo `.env` está no `.gitignore` e não deve ser commitado. A conexão da aplicação usa exclusivamente `DATABASE_URL`.
+Copy `.env.example` to `.env`. The `.env` file is ignored by Git and must never be committed. The application connects exclusively through `DATABASE_URL`.
 
-## Evidências e Histórico
+## Evidence and Build History
 
-- [EVIDENCE.md](EVIDENCE.md) registra os resultados dos testes e probes.
-- [BUILDLOG.md](BUILDLOG.md) registra o uso de IA, falhas encontradas e correções.
-- [capstone.yaml](capstone.yaml) contém os comandos de execução, teste, seed e URLs base.
+- [EVIDENCE.md](EVIDENCE.md) records test and probe results.
+- [BUILDLOG.md](BUILDLOG.md) records AI assistance, discovered failures and fixes.
+- [capstone.yaml](capstone.yaml) contains run, test, seed and base URL commands.
 
-## Limitações Conhecidas
+## Known Limitations
 
-- A notificação é um mock via `console.log`; nenhum provedor real de email ou webhook está configurado.
-- Os provedores de geolocalização são serviços públicos gratuitos e podem sofrer timeout ou rate limit.
-- O rate limiter usa memória local e deve ser substituído por um store compartilhado em múltiplas instâncias.
-- O site cliente usa portas locais diferentes (`8080` e `3000`) para simular origens cruzadas; não há CDN externa neste ambiente.
+- Notification delivery is mocked with `console.log`; no real email or webhook provider is configured.
+- The geolocation providers are free public services and may time out or apply rate limits.
+- The rate limiter uses local memory and should be replaced with a shared store for multiple instances.
+- The client site uses different local ports (`8080` and `3000`) to simulate cross-origin traffic; no external CDN is used in this environment.
