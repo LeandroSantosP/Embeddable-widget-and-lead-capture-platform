@@ -1,4 +1,14 @@
 const env = require('../config/env');
+const net = require('node:net');
+
+function isLocalOrPrivateIp(ipAddress) {
+  const normalizedIp = ipAddress.replace(/^::ffff:/, '');
+  const version = net.isIP(normalizedIp);
+  if (version === 6) return normalizedIp === '::1' || normalizedIp.toLowerCase().startsWith('fc') || normalizedIp.toLowerCase().startsWith('fd') || normalizedIp.toLowerCase().startsWith('fe8') || normalizedIp.toLowerCase().startsWith('fe9') || normalizedIp.toLowerCase().startsWith('fea') || normalizedIp.toLowerCase().startsWith('feb');
+  if (version !== 4) return true;
+  const octets = normalizedIp.split('.').map(Number);
+  return octets[0] === 10 || octets[0] === 127 || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31) || (octets[0] === 192 && octets[1] === 168);
+}
 
 async function requestJson(url) {
   const controller = new AbortController();
@@ -13,6 +23,8 @@ async function requestJson(url) {
 }
 
 async function enrich(ipAddress) {
+  if (isLocalOrPrivateIp(ipAddress)) return null;
+
   try {
     const data = await requestJson(`http://ip-api.com/json/${encodeURIComponent(ipAddress)}?fields=status,country,regionName,city,lat,lon,timezone`);
     if (data.status !== 'success') throw new Error('ip-api could not locate IP');

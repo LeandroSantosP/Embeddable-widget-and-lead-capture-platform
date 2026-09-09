@@ -51,6 +51,26 @@ npm run dev
 
 The API will be available at `http://localhost:3000`.
 
+### Client dashboard
+
+The React/Vite dashboard is located in [`front-end/`](front-end/). Start it in a second terminal after starting the API:
+
+```sh
+cd front-end
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Open `http://localhost:5173`. The dashboard supports tenant login/registration, widget CRUD, embed-snippet copying, lead viewing and submission statistics. `VITE_API_URL` defaults to `http://localhost:3000`.
+
+To validate a production build:
+
+```sh
+cd front-end
+npm run build
+```
+
 Run the automated tests with:
 
 ```sh

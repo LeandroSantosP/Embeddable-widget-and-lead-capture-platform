@@ -3,6 +3,14 @@ const geoService = require('../src/services/geoService');
 describe('geoService fallback chain', () => {
   afterEach(() => jest.restoreAllMocks());
 
+  test('skips external providers for localhost IPs', async () => {
+    global.fetch = jest.fn();
+
+    await expect(geoService.enrich('::1')).resolves.toBeNull();
+
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
   test('uses ipapi.co when ip-api.com fails', async () => {
     global.fetch = jest.fn()
       .mockRejectedValueOnce(new Error('primary timeout'))
