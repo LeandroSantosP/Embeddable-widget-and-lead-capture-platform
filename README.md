@@ -64,6 +64,10 @@ npm run dev
 
 Open `http://localhost:5173`. The dashboard supports tenant login/registration, widget CRUD, embed-snippet copying, lead viewing and submission statistics. `VITE_API_URL` defaults to `http://localhost:3000`.
 
+### Dashboard demonstration
+
+![Dashboard demonstration](ezgif.com-cut.gif)
+
 To validate a production build:
 
 ```sh
